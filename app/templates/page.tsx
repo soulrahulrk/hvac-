@@ -183,7 +183,10 @@ export default function TemplatesPage() {
   const [newChannel, setNewChannel] = useState<Channel>('SMS');
   const [newBody, setNewBody] = useState('');
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(t);
+  }, []);
 
   const filtered = activeTab === 'All' ? TEMPLATES : TEMPLATES.filter((t) => t.category === activeTab);
 

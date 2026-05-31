@@ -99,8 +99,6 @@ const INITIAL_LEADS: Lead[] = [
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
-const fmt = (n: number) =>
-  n >= 1000 ? `$${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}k` : `$${n}`;
 
 const fmtFull = (n: number) =>
   `$${n.toLocaleString()}`;
@@ -718,7 +716,7 @@ export default function PipelinePage() {
         <div className="pipeline-summary">
           <div className="summary-title">Pipeline Conversion Funnel</div>
           <div className="funnel">
-            {funnel.map((step, i) => {
+            {funnel.map((step) => {
               const maxCount = Math.max(...funnel.map((f) => f.count));
               const widthPct = maxCount > 0 ? (step.count / maxCount) * 100 : 0;
 

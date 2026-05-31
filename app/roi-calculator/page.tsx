@@ -140,11 +140,8 @@ export default function ROICalculatorPage() {
     databaseSize,
     avgServiceTicket,
     avgInstallTicket,
-    followUpRate,
-    googleReviews,
     monthlyInboundCalls,
     hasMembership,
-    annualRevenue,
   ]);
 
   return (
