@@ -1,0 +1,113 @@
+// HVAC Revenue Recovery - Prisma Schema
+// Database: SQLite (free prototype)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ──────────────────────────────────────────────
+// Enums are not natively supported in SQLite,
+// so we use String fields with comments indicating
+// valid values. Validation happens at the app layer.
+// ──────────────────────────────────────────────
+
+model Customer {
+  id               Int       @id @default(autoincrement())
+  firstName        String
+  lastName         String
+  email            String
+  phone            String
+  address          String
+  city             String
+  state            String
+  zipCode          String
+  equipmentType    String    // AC, Furnace, HeatPump, Boiler
+  equipmentAge     Int
+  lastServiceDate  DateTime?
+  leadStatus       String    @default("NEW") // NEW, CONTACTED, QUALIFIED, DORMANT, ACTIVE, CHURNED
+  customerType     String    @default("RESIDENTIAL") // RESIDENTIAL, COMMERCIAL
+  estimateAmount   Float?
+  estimateStatus   String    @default("NONE") // NONE, SENT, FOLLOW_UP, ACCEPTED, DECLINED
+  membershipStatus String    @default("NONE") // NONE, ACTIVE, LAPSED, EXPIRED
+  notes            String?
+  tags             String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  messages     Message[]
+  activityLogs ActivityLog[]
+
+  @@index([leadStatus])
+  @@index([membershipStatus])
+  @@index([estimateStatus])
+  @@index([equipmentType])
+  @@index([customerType])
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  customerId Int
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  direction  String   // INBOUND, OUTBOUND
+  channel    String   // SMS, EMAIL, VOICE, SYSTEM
+  content    String
+  status     String   // SENT, DELIVERED, FAILED, RECEIVED
+  campaignId Int?
+  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  createdAt  DateTime @default(now())
+
+  @@index([customerId])
+  @@index([campaignId])
+  @@index([channel])
+  @@index([direction])
+}
+
+model Campaign {
+  id              Int      @id @default(autoincrement())
+  name            String
+  type            String   // REACTIVATION, ESTIMATE_FOLLOWUP, MAINTENANCE_REMINDER, REVIEW_REQUEST, REFERRAL, MEMBERSHIP_RENEWAL, SEASONAL, MISSED_CALL_TEXTBACK
+  status          String   @default("DRAFT") // DRAFT, ACTIVE, PAUSED, COMPLETED
+  targetSegment   String
+  messageTemplate String
+  totalSent       Int      @default(0)
+  totalResponded  Int      @default(0)
+  totalConverted  Int      @default(0)
+  revenueRecovered Float   @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  messages Message[]
+
+  @@index([type])
+  @@index([status])
+}
+
+model ActivityLog {
+  id          Int       @id @default(autoincrement())
+  customerId  Int?
+  customer    Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  type        String    // CALL_MISSED, CALL_ANSWERED, SMS_SENT, SMS_RECEIVED, EMAIL_SENT, ESTIMATE_SENT, APPOINTMENT_BOOKED, REVIEW_COLLECTED, CAMPAIGN_TRIGGERED
+  description String
+  metadata    String?
+  createdAt   DateTime  @default(now())
+
+  @@index([customerId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model Settings {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([key])
+}
