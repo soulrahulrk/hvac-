@@ -11,6 +11,7 @@ const pageTitles: Record<string, string> = {
   '/roi-calculator': 'ROI Calculator',
   '/pipeline': 'Pipeline',
   '/templates': 'Templates',
+  '/reviews': 'Reputation & Reviews',
   '/settings': 'Settings',
 };
 

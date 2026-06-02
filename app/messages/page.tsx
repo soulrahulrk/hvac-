@@ -271,6 +271,8 @@ export default function MessagesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [composerText, setComposerText] = useState('');
   const [channelSelect, setChannelSelect] = useState<'sms' | 'email'>('sms');
+  const [testPhone, setTestPhone] = useState('');
+  const [isSending, setIsSending] = useState(false);
 
   /* Derived state */
   const selected = conversations.find((c) => c.id === selectedId) ?? conversations[0];
@@ -291,6 +293,44 @@ export default function MessagesPage() {
     { key: 'email', label: 'Email' },
     { key: 'system', label: 'System' },
   ];
+
+  const handleSend = async () => {
+    if (!composerText.trim()) return;
+    
+    if (channelSelect === 'sms') {
+      const phoneToUse = testPhone.trim() || selected.phone.replace(/\D/g, '');
+      if (!phoneToUse) {
+        alert('Please provide a valid test phone number below to send SMS.');
+        return;
+      }
+      
+      setIsSending(true);
+      try {
+        const res = await fetch('/api/messages/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: phoneToUse,
+            text: composerText,
+          }),
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          alert('SMS sent successfully via Textbelt!');
+          setComposerText('');
+        } else {
+          alert(`Failed to send SMS: ${data.error}`);
+        }
+      } catch (err) {
+        alert('An error occurred while sending SMS.');
+      } finally {
+        setIsSending(false);
+      }
+    } else {
+      alert('Email sending not implemented for this demo.');
+    }
+  };
 
   /* ---------------------------------------------------------------- */
   /*  Render                                                           */
@@ -404,6 +444,13 @@ export default function MessagesPage() {
           </div>
 
           <div className="msg-chat-header-actions">
+            <input 
+              type="text" 
+              placeholder="Test Phone # (e.g. 5551234567)" 
+              value={testPhone}
+              onChange={(e) => setTestPhone(e.target.value)}
+              style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: '#fff', fontSize: '13px' }}
+            />
             <button className="msg-header-action-btn">
               👤 View Profile
             </button>
@@ -468,6 +515,7 @@ export default function MessagesPage() {
                 placeholder="Type your message..."
                 value={composerText}
                 onChange={(e) => setComposerText(e.target.value)}
+                onKeyDown={(e) => { if(e.key === 'Enter') handleSend(); }}
               />
             </div>
 
@@ -482,7 +530,9 @@ export default function MessagesPage() {
               </select>
 
               <button className="msg-ai-suggest-btn">✨ AI Suggest</button>
-              <button className="msg-send-btn">Send</button>
+              <button className="msg-send-btn" onClick={handleSend} disabled={isSending}>
+                {isSending ? 'Sending...' : 'Send'}
+              </button>
             </div>
           </div>
         </div>

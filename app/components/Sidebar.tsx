@@ -19,6 +19,7 @@ const navItems: NavItem[] = [
   { icon: '💰', label: 'ROI Calculator', href: '/roi-calculator' },
   { icon: '📋', label: 'Pipeline', href: '/pipeline' },
   { icon: '📝', label: 'Templates', href: '/templates' },
+  { icon: '⭐', label: 'Reviews', href: '/reviews' },
   { icon: '⚙️', label: 'Settings', href: '/settings' },
 ];
 

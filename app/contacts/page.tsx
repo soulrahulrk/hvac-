@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './contacts.css';
 
 /* ─── Types ────────────────────────────────────────── */
-type LeadStatus = 'Active' | 'Dormant' | 'Churned' | 'New' | 'Contacted' | 'Qualified';
-type EquipmentType = 'AC' | 'Furnace' | 'Heat Pump' | 'Boiler';
-type MembershipStatus = 'Active' | 'Lapsed' | 'Expired' | 'None';
+type LeadStatus = 'Active' | 'Dormant' | 'Churned' | 'New' | 'Contacted' | 'Qualified' | string;
+type EquipmentType = 'AC' | 'Furnace' | 'Heat Pump' | 'Boiler' | string;
+type MembershipStatus = 'Active' | 'Lapsed' | 'Expired' | 'None' | string;
 
 interface Contact {
   id: number;
@@ -21,49 +21,27 @@ interface Contact {
   lastContact: string;
 }
 
-/* ─── Hardcoded Data ───────────────────────────────── */
-const contacts: Contact[] = [
-  { id: 1, name: 'James Morrison', phone: '(512) 555-0134', email: 'jmorrison@email.com', equipment: 'AC', equipmentAge: 14, leadStatus: 'Dormant', estimate: 8750, membership: 'Lapsed', lastContact: 'Mar 12, 2026' },
-  { id: 2, name: 'Sarah Chen', phone: '(512) 555-0278', email: 'schen@email.com', equipment: 'Heat Pump', equipmentAge: 3, leadStatus: 'Active', estimate: 12400, membership: 'Active', lastContact: 'May 28, 2026' },
-  { id: 3, name: 'Robert Williams', phone: '(512) 555-0391', email: 'rwilliams@email.com', equipment: 'Furnace', equipmentAge: 18, leadStatus: 'Churned', estimate: 6200, membership: 'Expired', lastContact: 'Jan 05, 2026' },
-  { id: 4, name: 'Maria Garcia', phone: '(512) 555-0445', email: 'mgarcia@email.com', equipment: 'AC', equipmentAge: 7, leadStatus: 'Qualified', estimate: 15300, membership: 'Active', lastContact: 'May 25, 2026' },
-  { id: 5, name: 'David Thompson', phone: '(512) 555-0517', email: 'dthompson@email.com', equipment: 'Boiler', equipmentAge: 22, leadStatus: 'Dormant', estimate: 9800, membership: 'None', lastContact: 'Feb 18, 2026' },
-  { id: 6, name: 'Emily Rodriguez', phone: '(512) 555-0623', email: 'erodriguez@email.com', equipment: 'Heat Pump', equipmentAge: 5, leadStatus: 'New', estimate: 11200, membership: 'None', lastContact: 'May 30, 2026' },
-  { id: 7, name: 'Michael Park', phone: '(512) 555-0748', email: 'mpark@email.com', equipment: 'AC', equipmentAge: 12, leadStatus: 'Active', estimate: 7600, membership: 'Active', lastContact: 'May 22, 2026' },
-  { id: 8, name: 'Jennifer Adams', phone: '(512) 555-0852', email: 'jadams@email.com', equipment: 'Furnace', equipmentAge: 9, leadStatus: 'Contacted', estimate: 4500, membership: 'Lapsed', lastContact: 'Apr 14, 2026' },
-  { id: 9, name: 'Daniel Kim', phone: '(512) 555-0963', email: 'dkim@email.com', equipment: 'AC', equipmentAge: 16, leadStatus: 'Dormant', estimate: 13100, membership: 'Expired', lastContact: 'Dec 08, 2025' },
-  { id: 10, name: 'Lisa Patel', phone: '(512) 555-1074', email: 'lpatel@email.com', equipment: 'Heat Pump', equipmentAge: 2, leadStatus: 'New', estimate: 9400, membership: 'None', lastContact: 'May 29, 2026' },
-  { id: 11, name: 'Chris Nguyen', phone: '(512) 555-1185', email: 'cnguyen@email.com', equipment: 'Boiler', equipmentAge: 11, leadStatus: 'Active', estimate: 18500, membership: 'Active', lastContact: 'May 27, 2026' },
-  { id: 12, name: 'Amanda Foster', phone: '(512) 555-1296', email: 'afoster@email.com', equipment: 'Furnace', equipmentAge: 20, leadStatus: 'Churned', estimate: 5800, membership: 'Expired', lastContact: 'Nov 15, 2025' },
-  { id: 13, name: 'Steven Wright', phone: '(512) 555-1307', email: 'swright@email.com', equipment: 'AC', equipmentAge: 6, leadStatus: 'Qualified', estimate: 10700, membership: 'Active', lastContact: 'May 20, 2026' },
-  { id: 14, name: 'Rachel Turner', phone: '(512) 555-1418', email: 'rturner@email.com', equipment: 'Heat Pump', equipmentAge: 8, leadStatus: 'Contacted', estimate: 14200, membership: 'Lapsed', lastContact: 'Apr 30, 2026' },
-  { id: 15, name: 'Kevin O\'Brien', phone: '(512) 555-1529', email: 'kobrien@email.com', equipment: 'Boiler', equipmentAge: 15, leadStatus: 'Dormant', estimate: 7300, membership: 'None', lastContact: 'Mar 04, 2026' },
-];
-
 /* ─── Helpers ──────────────────────────────────────── */
 
 function getInitials(name: string) {
-  return name.split(' ').map((n) => n[0]).join('').toUpperCase();
+  if (!name) return '??';
+  return name.split(' ').map((n) => n[0]).join('').toUpperCase().substring(0, 2);
 }
 
 function getStatusBadgeClass(status: LeadStatus): string {
-  switch (status) {
-    case 'Active':    return 'badge-green';
-    case 'Dormant':   return 'badge-yellow';
-    case 'Churned':   return 'badge-red';
-    case 'New':       return 'badge-blue';
-    case 'Qualified': return 'badge-purple';
-    case 'Contacted': return 'badge-cyan';
+  switch (status.toUpperCase()) {
+    case 'ACTIVE':    return 'badge-green';
+    case 'DORMANT':   return 'badge-yellow';
+    case 'CHURNED':   return 'badge-red';
+    case 'NEW':       return 'badge-blue';
+    case 'QUALIFIED': return 'badge-purple';
+    case 'CONTACTED': return 'badge-cyan';
     default:          return '';
   }
 }
 
-function getMembershipLabel(membership: MembershipStatus) {
-  return membership;
-}
-
 function formatCurrency(n: number) {
-  return '$' + n.toLocaleString();
+  return '$' + (n || 0).toLocaleString();
 }
 
 /* ─── Component ────────────────────────────────────── */
@@ -73,6 +51,58 @@ export default function ContactsPage() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [equipmentFilter, setEquipmentFilter] = useState('All');
   const [membershipFilter, setMembershipFilter] = useState('All');
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  useEffect(() => {
+    fetchContacts();
+  }, []);
+
+  const fetchContacts = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/contacts');
+      const data = await res.json();
+      
+      const mapped: Contact[] = data.map((d: any) => ({
+        id: d.id,
+        name: `${d.firstName} ${d.lastName}`.trim(),
+        phone: d.phone || 'N/A',
+        email: d.email,
+        equipment: d.equipmentType || 'Unknown',
+        equipmentAge: d.equipmentAge || 0,
+        leadStatus: d.leadStatus,
+        estimate: d.estimateAmount || 0,
+        membership: d.membershipStatus,
+        lastContact: new Date(d.updatedAt).toLocaleDateString(),
+      }));
+      setContacts(mapped);
+    } catch (err) {
+      console.error('Failed to fetch contacts:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSyncHubspot = async () => {
+    setIsSyncing(true);
+    try {
+      const res = await fetch('/api/hubspot/sync');
+      const data = await res.json();
+      if (data.success) {
+        alert(`Successfully synced ${data.syncedCount} contacts from Hubspot.`);
+        fetchContacts();
+      } else {
+        alert(`Failed to sync: ${data.error}`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error syncing with Hubspot');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const hasFilters =
     search !== '' ||
@@ -109,11 +139,11 @@ export default function ContactsPage() {
       <div className="page-header">
         <div className="page-header-left">
           <h1>Customer Database</h1>
-          <p>1,247 contacts · Last synced 2 hours ago</p>
+          <p>{contacts.length} contacts · Data populated dynamically</p>
         </div>
         <div className="page-header-right">
-          <button className="btn-primary">
-            <span className="btn-icon">📄</span> Upload CSV
+          <button className="btn-primary" onClick={handleSyncHubspot} disabled={isSyncing}>
+            <span className="btn-icon">🔄</span> {isSyncing ? 'Syncing...' : 'Sync Hubspot'}
           </button>
           <button className="btn-secondary">
             <span className="btn-icon">＋</span> Add Contact
@@ -141,12 +171,12 @@ export default function ContactsPage() {
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="All">All Statuses</option>
-            <option value="New">New</option>
-            <option value="Contacted">Contacted</option>
-            <option value="Qualified">Qualified</option>
-            <option value="Dormant">Dormant</option>
-            <option value="Active">Active</option>
-            <option value="Churned">Churned</option>
+            <option value="NEW">New</option>
+            <option value="CONTACTED">Contacted</option>
+            <option value="QUALIFIED">Qualified</option>
+            <option value="DORMANT">Dormant</option>
+            <option value="ACTIVE">Active</option>
+            <option value="CHURNED">Churned</option>
           </select>
 
           <select
@@ -167,10 +197,10 @@ export default function ContactsPage() {
             onChange={(e) => setMembershipFilter(e.target.value)}
           >
             <option value="All">All Memberships</option>
-            <option value="Active">Active</option>
-            <option value="Lapsed">Lapsed</option>
-            <option value="Expired">Expired</option>
-            <option value="None">None</option>
+            <option value="ACTIVE">Active</option>
+            <option value="LAPSED">Lapsed</option>
+            <option value="EXPIRED">Expired</option>
+            <option value="NONE">None</option>
           </select>
 
           {hasFilters && (
@@ -179,14 +209,6 @@ export default function ContactsPage() {
             </button>
           )}
         </div>
-      </div>
-
-      {/* ── Stats Badges ───────────────────────── */}
-      <div className="contacts-stats">
-        <span className="badge badge-green">● Active: 312</span>
-        <span className="badge badge-yellow">● Dormant: 445</span>
-        <span className="badge badge-red">● Churned: 187</span>
-        <span className="badge badge-blue">● New Leads: 203</span>
       </div>
 
       {/* ── Contacts Table ─────────────────────── */}
@@ -207,7 +229,12 @@ export default function ContactsPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((contact) => (
+              {isLoading && (
+                <tr>
+                  <td colSpan={9} style={{textAlign: 'center', padding: '2rem'}}>Loading...</td>
+                </tr>
+              )}
+              {!isLoading && filtered.map((contact) => (
                 <tr key={contact.id}>
                   {/* Name + Avatar */}
                   <td>
@@ -245,7 +272,7 @@ export default function ContactsPage() {
 
                   {/* Membership */}
                   <td>
-                    <span className="membership-label">{getMembershipLabel(contact.membership)}</span>
+                    <span className="membership-label">{contact.membership}</span>
                   </td>
 
                   {/* Last Contact */}
@@ -260,7 +287,7 @@ export default function ContactsPage() {
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && (
+              {!isLoading && filtered.length === 0 && (
                 <tr>
                   <td colSpan={9} className="empty-state">
                     No contacts match your filters.
@@ -274,11 +301,11 @@ export default function ContactsPage() {
         {/* ── Pagination ────────────────────────── */}
         <div className="pagination">
           <span className="pagination-info">
-            Showing 1–{filtered.length} of 1,247
+            Showing {filtered.length} of {contacts.length}
           </span>
           <div className="pagination-buttons">
             <button className="btn-secondary btn-sm" disabled>Previous</button>
-            <button className="btn-secondary btn-sm">Next</button>
+            <button className="btn-secondary btn-sm" disabled>Next</button>
           </div>
         </div>
       </div>
