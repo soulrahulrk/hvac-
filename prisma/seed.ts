@@ -557,15 +557,27 @@ async function main() {
   console.log('  🗑️  Clearing existing data...');
   await prisma.activityLog.deleteMany();
   await prisma.message.deleteMany();
+  await prisma.campaignStep.deleteMany();
   await prisma.campaign.deleteMany();
   await prisma.customer.deleteMany();
   await prisma.settings.deleteMany();
+  await prisma.organization.deleteMany();
+
+  // Seed an organization first
+  console.log('  🏢 Creating organization...');
+  const org = await prisma.organization.create({
+    data: {
+      name: 'ProComfort HVAC',
+      slug: 'procomfort-hvac',
+    }
+  });
+  console.log(`     ✅ Created organization ${org.id}`);
 
   // Seed customers
   console.log('  👥 Creating 50 customers...');
   const customerData = generateCustomers();
   for (const customer of customerData) {
-    await prisma.customer.create({ data: customer });
+    await prisma.customer.create({ data: { ...customer, orgId: org.id } });
   }
   const allCustomers = await prisma.customer.findMany({ select: { id: true } });
   const customerIds = allCustomers.map((c) => c.id);
@@ -574,7 +586,19 @@ async function main() {
   // Seed campaigns
   console.log('  📣 Creating campaigns...');
   for (const campaign of campaigns) {
-    await prisma.campaign.create({ data: campaign });
+    const { messageTemplate, ...campaignData } = campaign;
+    await prisma.campaign.create({ 
+      data: { 
+        ...campaignData, 
+        orgId: org.id,
+        steps: {
+          create: {
+            stepNumber: 1,
+            templateContent: messageTemplate
+          }
+        }
+      } 
+    });
   }
   const allCampaigns = await prisma.campaign.findMany({ select: { id: true } });
   const campaignIds = allCampaigns.map((c) => c.id);
@@ -584,14 +608,14 @@ async function main() {
   console.log('  📋 Creating activity logs...');
   const activityLogs = generateActivityLogs(customerIds, campaignIds);
   for (const log of activityLogs) {
-    await prisma.activityLog.create({ data: log });
+    await prisma.activityLog.create({ data: { ...log, orgId: org.id } });
   }
   console.log(`     ✅ Created ${activityLogs.length} activity log entries`);
 
   // Seed settings
   console.log('  ⚙️  Creating default settings...');
   for (const setting of defaultSettings) {
-    await prisma.settings.create({ data: setting });
+    await prisma.settings.create({ data: { ...setting, orgId: org.id } });
   }
   console.log(`     ✅ Created ${defaultSettings.length} settings`);
 
@@ -599,6 +623,7 @@ async function main() {
   console.log('  💬 Creating sample messages...');
   const sampleMessages = [
     {
+      orgId: org.id,
       customerId: customerIds[0],
       direction: 'OUTBOUND',
       channel: 'SMS',
@@ -709,7 +734,7 @@ async function main() {
   ];
 
   for (const message of sampleMessages) {
-    await prisma.message.create({ data: message });
+    await prisma.message.create({ data: { ...message, orgId: org.id } });
   }
   console.log(`     ✅ Created ${sampleMessages.length} messages`);
 
