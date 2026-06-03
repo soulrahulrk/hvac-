@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 /* ────────────────────────────────────────────
    Toggle Switch  (iOS-style, pure CSS)
@@ -83,6 +83,95 @@ export default function SettingsPage() {
     groq: [{ value: 'llama-3-70b', label: 'Llama 3 70B' }],
     gemini: [{ value: 'gemini-pro', label: 'Gemini Pro' }],
     openai: [{ value: 'gpt-4o', label: 'GPT-4o' }],
+  };
+
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/settings');
+        if (res.ok) {
+          const data = await res.json();
+          setTwilioSid(data.twilioSid || '');
+          setTwilioToken(data.twilioToken || '');
+          setTwilioPhone(data.twilioPhone || '');
+          setHubspotToken(data.hubspotToken || '');
+          setTextbeltKey(data.textbeltKey || '');
+          setAiProvider(data.aiProvider || 'groq');
+          setAiApiKey(data.aiApiKey || '');
+          setAiModel(data.aiModel || 'llama-3-70b');
+        }
+      } catch (err) {
+        console.error('Failed to load settings', err);
+      }
+    }
+    loadSettings();
+  }, []);
+
+  const [isSaving, setIsSaving] = useState(false);
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          twilioSid,
+          twilioToken,
+          twilioPhone,
+          hubspotToken,
+          textbeltKey,
+          aiProvider,
+          aiApiKey,
+          aiModel,
+        })
+      });
+      if (res.ok) {
+        alert('Settings saved successfully!');
+      } else {
+        const data = await res.json();
+        alert('Error saving settings: ' + data.error);
+      }
+    } catch (err: any) {
+      alert('Failed to save settings: ' + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleTestTextbelt = async () => {
+    if (!textbeltKey) return alert('Please enter a Textbelt key first.');
+    const phone = prompt('Enter a phone number to send a test message to (E.164 format, e.g., +12345678900):');
+    if (!phone) return;
+    try {
+      const res = await fetch('/api/settings/test-textbelt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, key: textbeltKey }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert('Test message sent successfully! Quota remaining: ' + data.quotaRemaining);
+      } else {
+        alert('Failed to send test message: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err: any) {
+      alert('Error: ' + err.message);
+    }
+  };
+
+  const handleSyncHubspot = async () => {
+    if (!hubspotToken) return alert('Please enter a HubSpot token first.');
+    try {
+      const res = await fetch('/api/hubspot/sync', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        alert(`Successfully synced! Created: ${data.created}, Updated: ${data.updated}, Skipped: ${data.skipped}`);
+      } else {
+        alert('Failed to sync: ' + data.error);
+      }
+    } catch (err: any) {
+      alert('Error: ' + err.message);
+    }
   };
 
   return (
@@ -684,7 +773,7 @@ export default function SettingsPage() {
             </div>
 
             <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end' }}>
-              <button className="settings-btn ghost sm">Test Connection</button>
+              <button type="button" className="settings-btn ghost sm" onClick={handleTestTextbelt}>Test Connection</button>
             </div>
           </div>
 
@@ -719,7 +808,7 @@ export default function SettingsPage() {
             </div>
 
             <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end' }}>
-              <button className="settings-btn ghost sm">Sync Customers</button>
+              <button type="button" className="settings-btn ghost sm" onClick={handleSyncHubspot}>Sync Customers</button>
             </div>
           </div>
 
@@ -1097,8 +1186,10 @@ export default function SettingsPage() {
             5. Footer Actions
            ══════════════════════════════════════════ */}
         <div className="settings-footer">
-          <button className="settings-btn ghost">Discard Changes</button>
-          <button className="settings-btn primary lg">Save All Settings</button>
+          <button type="button" className="settings-btn ghost" onClick={() => window.location.reload()}>Discard Changes</button>
+          <button type="button" className="settings-btn primary lg" onClick={handleSave} disabled={isSaving}>
+            {isSaving ? 'Saving...' : 'Save All Settings'}
+          </button>
         </div>
       </div>
     </>
