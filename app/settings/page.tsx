@@ -174,6 +174,38 @@ export default function SettingsPage() {
     }
   };
 
+  const handleTestTwilio = async () => {
+    if (!twilioSid || !twilioToken || !twilioPhone) return alert('Please enter Twilio SID, Token, and Phone first.');
+    const toPhone = prompt('Enter a destination phone number to test Twilio (E.164 format):');
+    if (!toPhone) return;
+    try {
+      const res = await fetch('/api/settings/test-twilio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sid: twilioSid, token: twilioToken, fromPhone: twilioPhone, toPhone }),
+      });
+      const data = await res.json();
+      if (res.ok) alert('Twilio test SMS sent! SID: ' + data.sid);
+      else alert('Twilio test failed: ' + data.error);
+    } catch (err: any) { alert('Error: ' + err.message); }
+  };
+
+  const handleDangerAction = async (action: 'reset-all' | 'clear-messages') => {
+    try {
+      const res = await fetch('/api/settings/danger', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message);
+        if (action === 'reset-all') setConfirmReset(false);
+        if (action === 'clear-messages') setConfirmClear(false);
+      } else alert('Action failed: ' + data.error);
+    } catch (err: any) { alert('Error: ' + err.message); }
+  };
+
   return (
     <>
       <style>{`
@@ -738,7 +770,7 @@ export default function SettingsPage() {
             </div>
 
             <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end' }}>
-              <button className="settings-btn ghost sm">Test Connection</button>
+              <button type="button" className="settings-btn ghost sm" onClick={handleTestTwilio}>Test Connection</button>
             </div>
           </div>
 
@@ -1131,8 +1163,9 @@ export default function SettingsPage() {
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <span className="danger-confirm-text">Are you sure?</span>
                 <button
+                  type="button"
                   className="settings-btn danger sm"
-                  onClick={() => setConfirmReset(false)}
+                  onClick={() => handleDangerAction('reset-all')}
                 >
                   Yes, Reset Everything
                 </button>
@@ -1166,8 +1199,9 @@ export default function SettingsPage() {
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <span className="danger-confirm-text">Are you sure?</span>
                 <button
+                  type="button"
                   className="settings-btn danger sm"
-                  onClick={() => setConfirmClear(false)}
+                  onClick={() => handleDangerAction('clear-messages')}
                 >
                   Yes, Clear History
                 </button>
