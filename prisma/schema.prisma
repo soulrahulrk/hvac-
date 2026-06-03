@@ -1,113 +1,719 @@
-// HVAC Revenue Recovery - Prisma Schema
-// Database: SQLite (free prototype)
+// HVAC Revenue Recovery — Production Schema
+// Database: PostgreSQL (Supabase)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-// ──────────────────────────────────────────────
-// Enums are not natively supported in SQLite,
-// so we use String fields with comments indicating
-// valid values. Validation happens at the app layer.
-// ──────────────────────────────────────────────
+// ═══════════════════════════════════════════════
+//  MULTI-TENANCY & AUTH
+// ═══════════════════════════════════════════════
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  plan      String   @default("FOUNDATION") // FOUNDATION, GROWTH, PERFORMANCE
+
+  // Integrations (encrypted at app layer)
+  twilioSid        String?
+  twilioToken      String?
+  twilioPhone      String?
+  hubspotToken     String?
+  mailgunKey       String?
+  mailgunDomain    String?
+  googleApiKey     String?
+  googlePlaceId    String?
+  textbeltKey      String?
+
+  // AI Configuration
+  aiProvider String @default("gemini") // gemini, openai, groq, nvidia
+  aiApiKey   String?
+  aiModel    String @default("gemini-2.0-flash")
+
+  // Branding
+  brandColor String  @default("#00d4ff")
+  logoUrl    String?
+  website    String?
+  phone      String?
+  email      String?
+  address    String?
+  city       String?
+  state      String?
+  zipCode    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users              User[]
+  customers          Customer[]
+  campaigns          Campaign[]
+  messages           Message[]
+  activityLogs       ActivityLog[]
+  segments           Segment[]
+  reviews            Review[]
+  referrals          Referral[]
+  appointments       Appointment[]
+  phoneCalls         PhoneCall[]
+  feedbacks          Feedback[]
+  memberships        Membership[]
+  revenueEvents      RevenueEvent[]
+  triggers           Trigger[]
+  jobQueues          JobQueue[]
+  auditLogs          AuditLog[]
+  settings           Settings[]
+  campaignTemplates  CampaignTemplate[]
+}
+
+model User {
+  id            String    @id @default(cuid())
+  orgId         String
+  org           Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  email         String    @unique
+  passwordHash  String
+  name          String
+  role          String    @default("MEMBER") // OWNER, ADMIN, MEMBER
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions   Session[]
+  auditLogs  AuditLog[]
+
+  @@index([orgId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expires      DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ═══════════════════════════════════════════════
+//  CORE BUSINESS MODELS
+// ═══════════════════════════════════════════════
 
 model Customer {
-  id               Int       @id @default(autoincrement())
+  id               String    @id @default(cuid())
+  orgId            String
+  org              Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
   firstName        String
   lastName         String
-  email            String    @unique
+  email            String?
   phone            String
-  address          String
-  city             String
-  state            String
-  zipCode          String
-  equipmentType    String    // AC, Furnace, HeatPump, Boiler
-  equipmentAge     Int
-  lastServiceDate  DateTime?
-  leadStatus       String    @default("NEW") // NEW, CONTACTED, QUALIFIED, DORMANT, ACTIVE, CHURNED
+  address          String?
+  city             String?
+  state            String?
+  zipCode          String?
+
+  // Equipment
+  equipmentType    String?   // AC, Furnace, HeatPump, Boiler, Ductless
+  equipmentAge     Int?
+  equipmentModel   String?
+  equipmentSerial  String?
+
+  // Status
+  leadStatus       String    @default("NEW") // NEW, CONTACTED, QUALIFIED, DORMANT, ACTIVE, CHURNED, WON, LOST
   customerType     String    @default("RESIDENTIAL") // RESIDENTIAL, COMMERCIAL
+  pipelineStage    String    @default("NEW_LEAD") // NEW_LEAD, CONTACTED, ESTIMATE_SENT, NEGOTIATION, WON, LOST
+
+  // Estimates
   estimateAmount   Float?
   estimateStatus   String    @default("NONE") // NONE, SENT, FOLLOW_UP, ACCEPTED, DECLINED
+  estimateSentAt   DateTime?
+
+  // Membership
   membershipStatus String    @default("NONE") // NONE, ACTIVE, LAPSED, EXPIRED
+  membershipPlan   String?
+  membershipExpiry DateTime?
+
+  // Service history
+  lastServiceDate  DateTime?
+  totalSpent       Float     @default(0)
+  totalServices    Int       @default(0)
+
+  // Communication
+  smsOptIn         Boolean   @default(true)
+  emailOptIn       Boolean   @default(true)
+  preferredChannel String    @default("SMS") // SMS, EMAIL, PHONE
+
+  // CRM
+  hubspotId        String?
+  externalId       String?
+  source           String?   // HUBSPOT, MANUAL, IMPORT, REFERRAL, WEBSITE
+
   notes            String?
-  tags             String?
+  tags             String?   // Comma-separated tags from segmentation engine
+
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  messages     Message[]
-  activityLogs ActivityLog[]
+  // Relations
+  messages            Message[]
+  activityLogs        ActivityLog[]
+  reviews             Review[]
+  referralsMade       Referral[]         @relation("ReferrerRelation")
+  referralsReceived   Referral[]         @relation("ReferredRelation")
+  appointments        Appointment[]
+  phoneCalls          PhoneCall[]
+  feedbacks           Feedback[]
+  memberships         Membership[]
+  revenueEvents       RevenueEvent[]
+  campaignEnrollments CampaignEnrollment[]
 
+  @@unique([orgId, phone])
+  @@unique([orgId, email])
+  @@index([orgId])
   @@index([leadStatus])
   @@index([membershipStatus])
   @@index([estimateStatus])
   @@index([equipmentType])
-  @@index([customerType])
+  @@index([pipelineStage])
+  @@index([lastServiceDate])
+  @@index([hubspotId])
 }
 
 model Message {
-  id         Int      @id @default(autoincrement())
-  customerId Int
+  id         String   @id @default(cuid())
+  orgId      String
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  customerId String
   customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
   direction  String   // INBOUND, OUTBOUND
   channel    String   // SMS, EMAIL, VOICE, SYSTEM
   content    String
-  status     String   // SENT, DELIVERED, FAILED, RECEIVED
-  campaignId Int?
-  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  subject    String?  // For emails
+  status     String   @default("PENDING") // PENDING, SENT, DELIVERED, FAILED, RECEIVED, OPENED, CLICKED
+  errorMessage String?
+
+  // Attribution
+  campaignId   String?
+  campaign     Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  enrollmentId String?
+
+  // External IDs
+  externalId   String?  // Twilio SID, Mailgun ID, etc.
+
+  // AI
+  aiGenerated  Boolean  @default(false)
+
   createdAt  DateTime @default(now())
 
+  @@index([orgId])
   @@index([customerId])
   @@index([campaignId])
   @@index([channel])
   @@index([direction])
+  @@index([status])
+  @@index([createdAt])
 }
 
+// ═══════════════════════════════════════════════
+//  CAMPAIGN ENGINE
+// ═══════════════════════════════════════════════
+
 model Campaign {
-  id              Int      @id @default(autoincrement())
+  id              String   @id @default(cuid())
+  orgId           String
+  org             Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
   name            String
-  type            String   // REACTIVATION, ESTIMATE_FOLLOWUP, MAINTENANCE_REMINDER, REVIEW_REQUEST, REFERRAL, MEMBERSHIP_RENEWAL, SEASONAL, MISSED_CALL_TEXTBACK
-  status          String   @default("DRAFT") // DRAFT, ACTIVE, PAUSED, COMPLETED
-  targetSegment   String
-  messageTemplate String
+  type            String   // REACTIVATION, ESTIMATE_FOLLOWUP, MAINTENANCE_REMINDER, REVIEW_REQUEST, REFERRAL, MEMBERSHIP_RENEWAL, SEASONAL, MISSED_CALL_TEXTBACK, FINANCING_FOLLOWUP, REPEAT_CUSTOMER, FEEDBACK, PIPELINE_ALERT, SMART_TAGGING
+  status          String   @default("DRAFT") // DRAFT, ACTIVE, PAUSED, COMPLETED, ARCHIVED
+  channel         String   @default("SMS") // SMS, EMAIL, MULTI
+
+  // Targeting
+  segmentId       String?
+  segment         Segment? @relation(fields: [segmentId], references: [id], onDelete: SetNull)
+  targetSegment   String?  // Legacy/fallback description
+
+  // Schedule
+  scheduleType    String   @default("IMMEDIATE") // IMMEDIATE, DELAYED, RECURRING
+  scheduledAt     DateTime?
+  recurringCron   String?  // Cron expression for recurring
+  businessHoursOnly Boolean @default(true)
+
+  // Stats (denormalized for performance)
   totalSent       Int      @default(0)
+  totalDelivered  Int      @default(0)
   totalResponded  Int      @default(0)
   totalConverted  Int      @default(0)
   revenueRecovered Float   @default(0)
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  messages Message[]
+  // Relations
+  steps       CampaignStep[]
+  enrollments CampaignEnrollment[]
+  messages    Message[]
+  revenueEvents RevenueEvent[]
 
+  @@index([orgId])
   @@index([type])
   @@index([status])
 }
 
+model CampaignStep {
+  id          String   @id @default(cuid())
+  campaignId  String
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  stepNumber  Int
+  delayMinutes Int    @default(0)  // Delay from previous step
+  channel     String  @default("SMS") // SMS, EMAIL
+  subject     String? // For emails
+  templateContent String // Message template with {variables}
+  aiPersonalize   Boolean @default(true) // Use AI to personalize
+
+  createdAt   DateTime @default(now())
+
+  @@unique([campaignId, stepNumber])
+  @@index([campaignId])
+}
+
+model CampaignEnrollment {
+  id          String    @id @default(cuid())
+  campaignId  String
+  campaign    Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  customerId  String
+  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  currentStep Int       @default(1)
+  status      String    @default("ACTIVE") // ACTIVE, COMPLETED, OPTED_OUT, RESPONDED, CONVERTED
+  enrolledAt  DateTime  @default(now())
+  lastStepAt  DateTime?
+  nextStepAt  DateTime?
+  completedAt DateTime?
+
+  @@unique([campaignId, customerId])
+  @@index([campaignId])
+  @@index([customerId])
+  @@index([status])
+  @@index([nextStepAt])
+}
+
+model CampaignTemplate {
+  id          String   @id @default(cuid())
+  orgId       String
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  name        String
+  category    String   // Reactivation, Follow-Up, Maintenance, Reviews, Referrals, Seasonal, Membership
+  channel     String   @default("SMS") // SMS, EMAIL
+  subject     String?
+  body        String
+  variables   String?  // JSON array of variable names used
+
+  // Performance
+  responseRate    Float  @default(0)
+  effectiveness   Float  @default(0)
+  timesUsed       Int    @default(0)
+
+  isSystem    Boolean  @default(false) // System-provided vs user-created
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([orgId])
+  @@index([category])
+}
+
+// ═══════════════════════════════════════════════
+//  SEGMENTATION
+// ═══════════════════════════════════════════════
+
+model Segment {
+  id              String   @id @default(cuid())
+  orgId           String
+  org             Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  name            String
+  description     String?
+  rules           String   // JSON: segmentation rules
+  customerCount   Int      @default(0)
+  isSystem        Boolean  @default(false) // System-generated vs custom
+  lastRefreshedAt DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  campaigns Campaign[]
+
+  @@unique([orgId, name])
+  @@index([orgId])
+}
+
+// ═══════════════════════════════════════════════
+//  REVIEWS & REPUTATION
+// ═══════════════════════════════════════════════
+
+model Review {
+  id              String    @id @default(cuid())
+  orgId           String
+  org             Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  customerId      String?
+  customer        Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  // Review data
+  googleReviewId  String?   @unique
+  authorName      String
+  rating          Int       // 1-5
+  text            String?
+  platform        String    @default("GOOGLE") // GOOGLE, YELP, FACEBOOK, INTERNAL
+
+  // Response
+  replyText       String?
+  replyStatus     String    @default("PENDING") // PENDING, REPLIED, SKIPPED
+  aiSuggestedReply String?
+
+  // Request tracking
+  requestSentAt   DateTime?
+  collectedAt     DateTime?
+  repliedAt       DateTime?
+
+  createdAt       DateTime  @default(now())
+
+  @@index([orgId])
+  @@index([customerId])
+  @@index([rating])
+  @@index([replyStatus])
+}
+
+// ═══════════════════════════════════════════════
+//  REFERRALS
+// ═══════════════════════════════════════════════
+
+model Referral {
+  id             String    @id @default(cuid())
+  orgId          String
+  org            Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  // Referrer (existing customer)
+  referrerId     String
+  referrer       Customer  @relation("ReferrerRelation", fields: [referrerId], references: [id], onDelete: Cascade)
+
+  // Referred person
+  referredId     String?
+  referred       Customer? @relation("ReferredRelation", fields: [referredId], references: [id], onDelete: SetNull)
+  referredName   String
+  referredPhone  String?
+  referredEmail  String?
+
+  // Tracking
+  referralCode   String    @unique
+  status         String    @default("PENDING") // PENDING, CONTACTED, BOOKED, COMPLETED, EXPIRED
+
+  // Rewards
+  rewardAmount   Float     @default(50)
+  rewardStatus   String    @default("PENDING") // PENDING, ISSUED, REDEEMED
+
+  createdAt      DateTime  @default(now())
+  convertedAt    DateTime?
+
+  @@index([orgId])
+  @@index([referrerId])
+  @@index([referralCode])
+  @@index([status])
+}
+
+// ═══════════════════════════════════════════════
+//  APPOINTMENTS & SERVICE
+// ═══════════════════════════════════════════════
+
+model Appointment {
+  id             String    @id @default(cuid())
+  orgId          String
+  org            Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  customerId     String
+  customer       Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  serviceType    String    // AC Repair, Furnace Install, Maintenance, etc.
+  scheduledAt    DateTime
+  completedAt    DateTime?
+  status         String    @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED, NO_SHOW
+
+  estimateAmount Float?
+  actualAmount   Float?
+  technicianName String?
+  notes          String?
+
+  // Triggers
+  reviewRequested Boolean  @default(false)
+  feedbackRequested Boolean @default(false)
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  revenueEvents  RevenueEvent[]
+
+  @@index([orgId])
+  @@index([customerId])
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+// ═══════════════════════════════════════════════
+//  PHONE CALLS
+// ═══════════════════════════════════════════════
+
+model PhoneCall {
+  id              String    @id @default(cuid())
+  orgId           String
+  org             Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  customerId      String?
+  customer        Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  externalCallId  String?   // Twilio Call SID
+  direction       String    // INBOUND, OUTBOUND
+  fromNumber      String
+  toNumber        String
+  status          String    // MISSED, ANSWERED, VOICEMAIL, BUSY, NO_ANSWER
+
+  duration        Int?      // seconds
+  recordingUrl    String?
+  transcription   String?
+  aiSummary       String?
+
+  // Missed call text-back
+  textBackSent    Boolean   @default(false)
+  textBackAt      DateTime?
+
+  createdAt       DateTime  @default(now())
+
+  @@index([orgId])
+  @@index([customerId])
+  @@index([status])
+  @@index([fromNumber])
+}
+
+// ═══════════════════════════════════════════════
+//  FEEDBACK
+// ═══════════════════════════════════════════════
+
+model Feedback {
+  id         String   @id @default(cuid())
+  orgId      String
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  type       String   // NPS, CSAT, CUSTOM
+  score      Int      // NPS: 0-10, CSAT: 1-5
+  comment    String?
+  surveyName String?
+
+  createdAt  DateTime @default(now())
+
+  @@index([orgId])
+  @@index([customerId])
+  @@index([type])
+}
+
+// ═══════════════════════════════════════════════
+//  MEMBERSHIPS
+// ═══════════════════════════════════════════════
+
+model Membership {
+  id           String    @id @default(cuid())
+  orgId        String
+  org          Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  customerId   String
+  customer     Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  plan         String    // Bronze, Silver, Gold, Platinum
+  price        Float
+  startDate    DateTime
+  endDate      DateTime
+  renewalDate  DateTime?
+  status       String    @default("ACTIVE") // ACTIVE, LAPSED, EXPIRED, CANCELLED, RENEWED
+
+  autoRenew    Boolean   @default(false)
+  renewalSent  Boolean   @default(false) // Has renewal reminder been sent
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([orgId])
+  @@index([customerId])
+  @@index([status])
+  @@index([endDate])
+}
+
+// ═══════════════════════════════════════════════
+//  REVENUE ATTRIBUTION
+// ═══════════════════════════════════════════════
+
+model RevenueEvent {
+  id            String    @id @default(cuid())
+  orgId         String
+  org           Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  customerId    String
+  customer      Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  campaignId    String?
+  campaign      Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  type          String   // LEAD_REACTIVATION, ESTIMATE_CONVERSION, MEMBERSHIP_RENEWAL, REFERRAL, REPEAT_CUSTOMER, REVIEW_DRIVEN, MISSED_CALL_RECOVERY, SEASONAL_CAMPAIGN
+  amount        Float
+  description   String?
+  attributedAt  DateTime @default(now())
+
+  createdAt     DateTime @default(now())
+
+  @@index([orgId])
+  @@index([customerId])
+  @@index([campaignId])
+  @@index([type])
+  @@index([attributedAt])
+}
+
+// ═══════════════════════════════════════════════
+//  AUTOMATION TRIGGERS
+// ═══════════════════════════════════════════════
+
+model Trigger {
+  id          String   @id @default(cuid())
+  orgId       String
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  name        String
+  event       String   // MISSED_CALL, SERVICE_COMPLETED, ESTIMATE_SENT, ESTIMATE_DECLINED, MEMBERSHIP_EXPIRING, EQUIPMENT_AGE, WEATHER_ALERT, SEASONAL_DATE, REVIEW_RECEIVED, INBOUND_SMS
+  conditions  String?  // JSON conditions
+  actionType  String   // SEND_SMS, SEND_EMAIL, START_CAMPAIGN, CREATE_TASK, UPDATE_STATUS, AI_RESPOND
+  actionConfig String  // JSON action configuration
+
+  enabled     Boolean  @default(true)
+  executionCount Int   @default(0)
+  lastFiredAt DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([orgId])
+  @@index([event])
+  @@index([enabled])
+}
+
+// ═══════════════════════════════════════════════
+//  JOB QUEUE (Vercel-compatible, DB-backed)
+// ═══════════════════════════════════════════════
+
+model JobQueue {
+  id          String    @id @default(cuid())
+  orgId       String
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  type        String    // SEND_SMS, SEND_EMAIL, CAMPAIGN_STEP, CRM_SYNC, SEGMENT_REFRESH, REVIEW_REQUEST, REFERRAL_FOLLOW_UP, MEMBERSHIP_CHECK, REVENUE_CALC, AI_GENERATE
+  payload     String    // JSON payload
+  status      String    @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED, DEAD
+  priority    Int       @default(0) // Higher = process first
+
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(3)
+  error       String?
+  result      String?   // JSON result
+
+  scheduledFor DateTime @default(now())
+  lockedAt     DateTime?
+  startedAt    DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime @default(now())
+
+  @@index([orgId])
+  @@index([status, scheduledFor])
+  @@index([type])
+  @@index([priority])
+}
+
+// ═══════════════════════════════════════════════
+//  ACTIVITY LOG
+// ═══════════════════════════════════════════════
+
 model ActivityLog {
-  id          Int       @id @default(autoincrement())
-  customerId  Int?
+  id          String    @id @default(cuid())
+  orgId       String
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  customerId  String?
   customer    Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  type        String    // CALL_MISSED, CALL_ANSWERED, SMS_SENT, SMS_RECEIVED, EMAIL_SENT, ESTIMATE_SENT, APPOINTMENT_BOOKED, REVIEW_COLLECTED, CAMPAIGN_TRIGGERED
+
+  type        String    // CALL_MISSED, CALL_ANSWERED, SMS_SENT, SMS_RECEIVED, EMAIL_SENT, ESTIMATE_SENT, ESTIMATE_ACCEPTED, ESTIMATE_DECLINED, APPOINTMENT_BOOKED, APPOINTMENT_COMPLETED, REVIEW_REQUESTED, REVIEW_COLLECTED, CAMPAIGN_LAUNCHED, CAMPAIGN_COMPLETED, MEMBERSHIP_RENEWED, REFERRAL_CREATED, REVENUE_RECORDED, LEAD_STATUS_CHANGED, PIPELINE_STAGE_CHANGED
   description String
-  metadata    String?
+  metadata    String?   // JSON
+
   createdAt   DateTime  @default(now())
 
+  @@index([orgId])
   @@index([customerId])
   @@index([type])
   @@index([createdAt])
 }
 
+// ═══════════════════════════════════════════════
+//  AUDIT LOG (Security)
+// ═══════════════════════════════════════════════
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  orgId       String
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  action      String   // CREATE, UPDATE, DELETE, LOGIN, LOGOUT, API_CALL, SETTINGS_CHANGED, CAMPAIGN_LAUNCHED
+  resource    String   // Customer, Campaign, Settings, etc.
+  resourceId  String?
+  details     String?  // JSON
+  ipAddress   String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([orgId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// ═══════════════════════════════════════════════
+//  SETTINGS (per-org key-value)
+// ═══════════════════════════════════════════════
+
 model Settings {
-  id          Int      @id @default(autoincrement())
-  key         String   @unique
+  id          String   @id @default(cuid())
+  orgId       String
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  key         String
   value       String
   description String?
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@index([key])
+  @@unique([orgId, key])
+  @@index([orgId])
 }

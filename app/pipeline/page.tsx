@@ -37,79 +37,43 @@ const nextStage: Record<Stage, Stage | null> = {
   won: null,
 };
 
-const INITIAL_LEADS: Lead[] = [
-  // ── New Leads ──
-  { id: 1, name: 'John Smith', service: 'AC Repair', amount: 450, time: '2 hours ago', badge: '🔥', badgeLabel: 'Hot Lead', stage: 'new' },
-  { id: 2, name: 'Maria Garcia', service: 'AC Install', amount: 4200, time: '5 hours ago', stage: 'new' },
-  { id: 3, name: 'Robert Wilson', service: 'Furnace Repair', amount: 380, time: '1 day ago', stage: 'new' },
-  { id: 4, name: 'Amanda Torres', service: 'AC Tune-Up', amount: 189, time: '1 day ago', badge: '🔥', badgeLabel: 'Hot Lead', stage: 'new' },
-  { id: 5, name: 'Kevin Lee', service: 'Heat Pump Repair', amount: 720, time: '2 days ago', stage: 'new' },
-  { id: 6, name: 'Rachel Adams', service: 'Duct Cleaning', amount: 350, time: '2 days ago', stage: 'new' },
-  { id: 7, name: 'Derek Patel', service: 'AC Install', amount: 5100, time: '3 days ago', stage: 'new' },
-  { id: 8, name: 'Nancy Kim', service: 'Thermostat Install', amount: 280, time: '3 days ago', stage: 'new' },
-  { id: 9, name: 'Brian Foster', service: 'Furnace Tune-Up', amount: 159, time: '3 days ago', stage: 'new' },
-  { id: 10, name: 'Olivia Nguyen', service: 'AC Repair', amount: 520, time: '4 days ago', stage: 'new' },
-  { id: 11, name: 'Carlos Rivera', service: 'Boiler Repair', amount: 890, time: '4 days ago', stage: 'new' },
-  { id: 12, name: 'Diane Hughes', service: 'Mini-Split Install', amount: 3800, time: '5 days ago', stage: 'new' },
+const fmtFull = (n: number) => `$${n.toLocaleString()}`;
 
-  // ── Contacted ──
-  { id: 13, name: 'Sarah Johnson', service: 'AC Tune-Up', amount: 189, time: 'Called 1 day ago', stage: 'contacted' },
-  { id: 14, name: 'Mike Davis', service: 'Heat Pump Install', amount: 6800, time: 'Emailed 2 days ago', badge: '🔥', badgeLabel: 'Hot Lead', stage: 'contacted' },
-  { id: 15, name: 'Patricia Moore', service: 'AC Repair', amount: 540, time: 'Called 2 days ago', stage: 'contacted' },
-  { id: 16, name: 'George Clark', service: 'Duct Work', amount: 1900, time: 'Texted 3 days ago', stage: 'contacted' },
-  { id: 17, name: 'Helen Wright', service: 'Furnace Repair', amount: 650, time: 'Called 3 days ago', stage: 'contacted' },
-  { id: 18, name: 'Samuel Brooks', service: 'AC Install', amount: 4400, time: 'Emailed 4 days ago', stage: 'contacted' },
-  { id: 19, name: 'Laura Flores', service: 'Thermostat Install', amount: 310, time: 'Called 4 days ago', stage: 'contacted' },
-  { id: 20, name: 'Tony Marshall', service: 'AC Repair', amount: 475, time: 'Called 5 days ago', stage: 'contacted' },
-
-  // ── Estimate Sent ──
-  { id: 21, name: 'Lisa Chen', service: 'AC Replacement', amount: 5200, time: 'Sent 3 days ago', badge: '⚠️', badgeLabel: 'Needs Follow-Up', stage: 'estimate' },
-  { id: 22, name: 'Tom Brown', service: 'Duct Work', amount: 2800, time: 'Sent 1 day ago', stage: 'estimate' },
-  { id: 23, name: 'Jessica Taylor', service: 'Heat Pump Install', amount: 7200, time: 'Sent 2 days ago', badge: '⚠️', badgeLabel: 'Needs Follow-Up', stage: 'estimate' },
-  { id: 24, name: 'Andrew Scott', service: 'AC Install', amount: 4600, time: 'Sent 4 days ago', badge: '⚠️', badgeLabel: 'Overdue', stage: 'estimate' },
-  { id: 25, name: 'Megan White', service: 'Furnace Install', amount: 5800, time: 'Sent 1 day ago', stage: 'estimate' },
-  { id: 26, name: 'Chris Evans', service: 'AC Repair', amount: 680, time: 'Sent 2 days ago', stage: 'estimate' },
-  { id: 27, name: 'Diana Ross', service: 'Mini-Split Install', amount: 3600, time: 'Sent 3 days ago', stage: 'estimate' },
-  { id: 28, name: 'Frank Miller', service: 'Boiler Install', amount: 8900, time: 'Sent 5 days ago', badge: '⚠️', badgeLabel: 'Overdue', stage: 'estimate' },
-  { id: 29, name: 'Sophie Turner', service: 'AC Tune-Up', amount: 189, time: 'Sent 1 day ago', stage: 'estimate' },
-  { id: 30, name: 'Ryan Cooper', service: 'Duct Cleaning', amount: 420, time: 'Sent 2 days ago', stage: 'estimate' },
-  { id: 31, name: 'Natalie Reed', service: 'Heat Pump Repair', amount: 950, time: 'Sent 3 days ago', stage: 'estimate' },
-  { id: 32, name: 'Victor Hayes', service: 'Furnace Repair', amount: 540, time: 'Sent 4 days ago', badge: '⚠️', badgeLabel: 'Needs Follow-Up', stage: 'estimate' },
-  { id: 33, name: 'Angela Price', service: 'AC Install', amount: 4100, time: 'Sent 2 days ago', stage: 'estimate' },
-  { id: 34, name: 'Jason Ward', service: 'Thermostat Install', amount: 290, time: 'Sent 1 day ago', stage: 'estimate' },
-  { id: 35, name: 'Kimberly Cox', service: 'AC Replacement', amount: 6200, time: 'Sent 5 days ago', badge: '⚠️', badgeLabel: 'Overdue', stage: 'estimate' },
-
-  // ── Follow-Up ──
-  { id: 36, name: 'James Williams', service: 'Furnace Install', amount: 4500, time: '2nd follow-up', badge: '🔥', badgeLabel: 'Hot Lead', stage: 'followup' },
-  { id: 37, name: 'Rebecca Hall', service: 'AC Install', amount: 5100, time: '1st follow-up', stage: 'followup' },
-  { id: 38, name: 'Daniel King', service: 'Heat Pump Install', amount: 7400, time: '3rd follow-up', badge: '⚠️', badgeLabel: 'At Risk', stage: 'followup' },
-  { id: 39, name: 'Stephanie Bell', service: 'Duct Work', amount: 3200, time: '1st follow-up', stage: 'followup' },
-  { id: 40, name: 'Mark Rivera', service: 'AC Replacement', amount: 5600, time: '2nd follow-up', stage: 'followup' },
-  { id: 41, name: 'Jennifer Long', service: 'Boiler Repair', amount: 1200, time: '1st follow-up', stage: 'followup' },
-  { id: 42, name: 'Paul Griffin', service: 'Furnace Repair', amount: 780, time: '2nd follow-up', stage: 'followup' },
-
-  // ── Won / Closed ──
-  { id: 43, name: 'Emily Davis', service: 'AC Install', amount: 4800, time: 'Closed yesterday', badge: '✅', badgeLabel: 'Closed', stage: 'won' },
-  { id: 44, name: 'Nathan Brooks', service: 'Heat Pump Install', amount: 6900, time: 'Closed 2 days ago', badge: '✅', badgeLabel: 'Closed', stage: 'won' },
-  { id: 45, name: 'Ashley Morgan', service: 'Furnace Install', amount: 5200, time: 'Closed 3 days ago', badge: '✅', badgeLabel: 'Closed', stage: 'won' },
-  { id: 46, name: 'Brandon Cole', service: 'AC Replacement', amount: 5800, time: 'Closed 4 days ago', badge: '✅', badgeLabel: 'Closed', stage: 'won' },
-  { id: 47, name: 'Michelle Perry', service: 'Duct Work', amount: 3100, time: 'Closed 5 days ago', badge: '✅', badgeLabel: 'Closed', stage: 'won' },
-];
-
-/* ------------------------------------------------------------------ */
-/*  Helpers                                                            */
-/* ------------------------------------------------------------------ */
-
-const fmtFull = (n: number) =>
-  `$${n.toLocaleString()}`;
-
-/* ------------------------------------------------------------------ */
-/*  Component                                                          */
-/* ------------------------------------------------------------------ */
 export default function PipelinePage() {
-  const [leads, setLeads] = useState<Lead[]>(INITIAL_LEADS);
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [filter, setFilter] = useState('all');
   const [openMenu, setOpenMenu] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetchPipeline();
+  }, []);
+
+  const fetchPipeline = async () => {
+    try {
+      const res = await fetch('/api/pipeline');
+      const data = await res.json();
+      
+      const mapLead = (c: any, stage: Stage): Lead => ({
+        id: c.id,
+        name: `${c.firstName} ${c.lastName}`.trim(),
+        service: c.equipmentType || 'HVAC Service',
+        amount: c.estimateAmount || c.totalSpent || 0,
+        time: new Date(c.updatedAt).toLocaleDateString(),
+        stage
+      });
+
+      const allLeads = [
+        ...(data.NEW || []).map((c: any) => mapLead(c, 'new')),
+        ...(data.CONTACTED || []).map((c: any) => mapLead(c, 'contacted')),
+        ...(data.ESTIMATE || []).map((c: any) => mapLead(c, 'estimate')),
+        ...(data.WON || []).map((c: any) => mapLead(c, 'won')),
+      ];
+      
+      setLeads(allLeads);
+    } catch (err) {
+      console.error('Failed to load pipeline', err);
+    }
+  };
 
   const moveLead = (id: number) => {
     setLeads((prev) =>
@@ -129,15 +93,12 @@ export default function PipelinePage() {
   };
 
   const byStage = (stage: Stage) => leads.filter((l) => l.stage === stage);
-  const stageValue = (stage: Stage) =>
-    byStage(stage).reduce((s, l) => s + l.amount, 0);
-
+  const stageValue = (stage: Stage) => byStage(stage).reduce((s, l) => s + l.amount, 0);
   const totalValue = leads.reduce((s, l) => s + l.amount, 0);
 
-  /* funnel data */
   const funnel = STAGES.map((s) => {
     const count = byStage(s.key).length;
-    return { ...s, count, pct: Math.round((count / leads.length) * 100) };
+    return { ...s, count, pct: leads.length > 0 ? Math.round((count / leads.length) * 100) : 0 };
   });
 
   return (

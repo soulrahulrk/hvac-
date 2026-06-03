@@ -1,0 +1,448 @@
+
+--- ppt/slides/slide1.xml ---
+HVAC GROWTH SYSTEM
+STOP LEAVING REVENUE
+ON THE TABLE.
+AI-Powered Revenue Recovery & Customer Lifecycle Infrastructure
+for HVAC Companies Doing $500K–$20M/Year
+62%
+of HVAC leads
+never followed up
+$47K
+avg. yearly revenue
+lost to inaction
+3.2×
+more revenue from
+existing customers
+< 30 Days
+to measurable
+results
+
+--- ppt/slides/slide2.xml ---
+MARKET REALITY
+The HVAC Industry Has a
+Revenue Retention Problem.
+62%
+Inbound calls go unanswered
+or unresolved
+78%
+Estimates never receive
+a follow-up call
+4%
+Average HVAC customer
+retention rate
+91%
+Unhappy customers leave
+without saying a word
+Most operators assume their team is handling follow-ups. The data says otherwise.
+
+--- ppt/slides/slide3.xml ---
+PAIN POINTS
+11 Revenue Leaks Inside
+Your Business Right Now
+Dead leads sitting untouched in CRM
+Estimates sent — never followed up
+Customers churning without re-engagement
+Missed calls with no text-back system
+Maintenance reminders falling through
+Review volume too low to compete
+No referral system to leverage happy clients
+Membership renewals missed or delayed
+CRM data messy, untagged, unusable
+Seasonal campaigns not executed on time
+Low rebooking rate after service visits
+
+--- ppt/slides/slide4.xml ---
+HIDDEN REVENUE
+The Money Is Already There.
+You Just Can't Access It.
+Your
+Existing
+Database
+28%
+Dormant leads
+41%
+Past customers
+19%
+Open estimates
+12%
+Lapsed members
+The average HVAC company has 1,200–4,000 contacts in their CRM.
+Fewer than 15% are actively monetized.
+
+--- ppt/slides/slide5.xml ---
+COST OF INACTION
+What Doing Nothing
+Actually Costs You
+$47,000+
+Average annual lost revenue
+for a $1M HVAC company
+3–5 Years
+Revenue gap compounds
+without lifecycle systems
+$280K+
+Lifetime value left on table
+over a 6-year window
+
+--- ppt/slides/slide6.xml ---
+INDUSTRY PROBLEM
+Why Traditional Marketing
+Agencies Won't Fix This
+What Agencies Focus On
+✗  Paid ads & new lead gen
+✗  SEO and website traffic
+✗  Social media content
+✗  Brand awareness campaigns
+✗  Monthly reporting on clicks
+What Your Business Needs
+✓  Following up on existing leads
+✓  Reactivating dormant customers
+✓  Automating maintenance reminders
+✓  Collecting reviews at the right time
+✓  Closing the leaks in your pipeline
+VS
+Agencies solve the acquisition problem. Nobody is solving the retention and reactivation problem.
+
+--- ppt/slides/slide7.xml ---
+THE SOLUTION
+AI-Powered Revenue Recovery &
+Customer Lifecycle Infrastructure
+One system. Built for HVAC. Focused entirely on recovering and retaining revenue.
+💰
+Revenue
+Recovery
+Reactivate dormant leads, uncontacted estimates, and lapsed customers sitting in your CRM.
+🔄
+Lifecycle
+Automation
+Trigger the right message at the right time — from first visit through annual maintenance.
+⭐
+Reputation
+Amplification
+Automate review collection, Google profile optimization, and referral systems.
+📊
+Performance
+Intelligence
+Real-time dashboards showing revenue recovered, leads engaged, and campaigns live.
+
+--- ppt/slides/slide8.xml ---
+SYSTEM FEATURES
+16 Revenue-Generating Capabilities
+🔁
+Old Lead Reactivation
+📋
+Estimate Follow-Up Automation
+🤖
+AI Receptionist (24/7)
+📱
+Missed-Call Text-Back
+⭐
+Review Collection Automation
+📍
+Google Business Profile Optimization
+🎁
+Referral Campaign System
+🔧
+Maintenance Reminder Campaigns
+💳
+Membership Renewal Automation
+📊
+Customer Feedback Collection
+💬
+AI SMS Follow-Up Sequences
+🌤️
+Seasonal Campaign Triggers
+💰
+Financing Follow-Up Automation
+🔄
+Repeat Customer Campaigns
+⚙️
+Pipeline Automation & Alerts
+🗂️
+CRM Cleanup & Smart Tagging
+
+--- ppt/slides/slide9.xml ---
+SYSTEM WORKFLOW
+How the System Works:
+From Data to Revenue in 7 Steps
+01
+CRM Data Extraction
+We connect to your existing CRM and extract all contacts, lead statuses, job history, and customer data.
+02
+Smart Segmentation
+AI segments your database: dormant leads, open estimates, past customers, lapsed members.
+03
+Campaign Deployment
+Personalized AI campaigns launch across SMS, email, and voice — tailored to each segment.
+04
+Automation Triggers
+Missed calls, new inquiries, and post-service interactions trigger instant automated responses.
+05
+Booking Recovery
+Engaged leads and reactivated customers are routed directly to your booking system.
+06
+Review Collection
+Happy customers are prompted at exactly the right moment to leave a 5-star Google review.
+07
+Revenue Reporting
+Weekly dashboard shows recovered revenue, campaigns live, reviews collected, and bookings generated.
+
+--- ppt/slides/slide10.xml ---
+PERSONALIZATION
+Every Campaign Is Built
+For That Specific Customer
+🔧
+Service Type
+AC repair vs. install vs. maintenance — different messages, different urgency
+📅
+Customer History
+First-time vs. repeat vs. VIP — loyalty-aware communication
+🌡️
+Season / Timing
+Pre-season tune-up campaigns triggered before peak demand
+⏱️
+Equipment Age
+Units 8–12 years old receive replacement-awareness messaging
+🎯
+Lead Status
+Cold leads vs. warm vs. quote-sent — each gets the right follow-up
+💡
+Buying Behavior
+High-ticket vs. budget-focused customers receive appropriate offers
+
+--- ppt/slides/slide11.xml ---
+OUR POSITIONING
+We're Not a Marketing Agency.
+We're a Revenue Operations Partner.
+Niche-Focused
+We work exclusively in HVAC and home services. We know the seasonality, the service cycles, the customer objections, and the CRM workflows.
+Revenue-First Metrics
+We measure success in booked jobs, recovered revenue, and customer lifetime value — not clicks, impressions, or open rates.
+Operational Compatibility
+We integrate into your existing CRM and tech stack. No rip-and-replace. No retraining your team on new software.
+Measurable Accountability
+Every campaign ties to a revenue outcome. You see exactly what's working, what's been recovered, and what's next.
+
+--- ppt/slides/slide12.xml ---
+OBJECTION HANDLING
+Answers to the Questions
+You're Probably Already Thinking
+"We already have a CRM."
+We work inside it — we don't replace it. We activate the data you're already ignoring.
+"Our staff handles follow-ups."
+Human staff can't follow up with 2,000 contacts consistently. We automate the volume so your team focuses on live calls.
+"AI sounds robotic."
+Our messages are indistinguishable from a personal text. Customers respond because it feels human.
+"We have marketing already."
+This isn't marketing. It's revenue operations — the backend your marketing drives leads into.
+"Sounds complicated."
+Onboarding takes one meeting and CRM access. Your team doesn't change anything.
+"Will this disrupt operations?"
+No. Everything runs in the background. Your staff won't notice until they see more inbound bookings.
+
+--- ppt/slides/slide13.xml ---
+ROI PROJECTION
+Conservative Revenue Recovery
+Projection — $1M Business Example
+Based on industry averages. Your actual results depend on database size and response rates.
+Revenue Source
+Assumption
+Est. Additional Revenue
+Old Lead Reactivation
+5% of 200 dormant leads × $450 avg ticket
+$4,500 / mo
+Estimate Follow-Up
+8% of 50 open estimates × $1,200 avg
+$4,800 / mo
+Repeat Customer Campaigns
+3% of 500 past customers × $380 avg
+$5,700 / mo
+Referral Campaigns
+12 referrals × $650 avg ticket
+$7,800 / mo
+Membership Renewals
+60% renewal improvement × $180 avg
+$2,160 / mo
+Review-Driven Leads
+3 extra jobs/mo from improved reputation
+$1,350 / mo
+TOTAL MONTHLY RECOVERY
+$26,310 / mo
+
+--- ppt/slides/slide14.xml ---
+PROJECTION EXAMPLE
+Before vs. After:
+A Typical Mid-Size HVAC Company
+BEFORE
+✗  Follow-up rate: 12% of leads
+✗  Avg. Google reviews: 43 total
+✗  Customer reactivation campaigns: 0
+✗  Estimate conversion rate: 22%
+✗  Referral program: None
+✗  Monthly recurring revenue: $0
+✗  Missed calls recovered: <10%
+AFTER (90 Days)
+✓  Follow-up rate: 100% (automated)
+✓  Avg. Google reviews: 127 total
+✓  Reactivation campaigns: 6 active
+✓  Estimate conversion rate: 34%
+✓  Referral program: Generating 8–15/mo
+✓  Monthly recurring revenue: $18,400
+✓  Missed calls recovered: 78%
+
+--- ppt/slides/slide15.xml ---
+COMPETITIVE POSITION
+How We're Different From
+Everything Else You've Seen
+Competitor Category
+What They Do
+What We Do
+Reputation Mgmt
+(Birdeye, Podium)
+✗  Review collection only
+✓  Reviews + full lifecycle + revenue recovery
+CRM Agencies
+(Generic)
+✗  Setup + training, no execution
+✓  Done-for-you operation, zero staff workload
+Marketing Agencies
+✗  New lead generation only
+✓  Monetizes existing database first
+Generic AI Tools
+(Zapier, Make.com)
+✗  Requires manual buildout
+✓  Pre-built HVAC-specific workflows, live in days
+
+--- ppt/slides/slide16.xml ---
+FUTURE CAPABILITIES
+Built to Grow With You:
+The Roadmap Ahead
+NOW LIVE
+→  AI SMS & email follow-ups
+→  Review collection automation
+→  Lead reactivation campaigns
+→  Missed-call text-back
+Q3 2025
+→  AI Voice Receptionist
+→  Predictive maintenance reminders
+→  Multi-location dashboard
+→  Seasonal trigger campaigns
+2026+
+→  Dispatch optimization AI
+→  Technician performance analytics
+→  Revenue forecasting models
+→  Franchise-level reporting
+
+--- ppt/slides/slide17.xml ---
+ONBOARDING TIMELINE
+From Signed Agreement to
+Revenue Recovery in 21 Days
+Days 1–3
+Onboarding Call
+CRM access granted. Business goals defined. Customer database reviewed.
+Days 4–7
+System Integration
+CRM connected. Contact segmentation complete. Phone/SMS routing configured.
+Days 8–12
+Campaign Build
+Reactivation, review, referral, and follow-up campaigns custom-built and approved.
+Days 13–15
+Soft Launch
+Campaigns go live. First 48-hour response monitoring and tuning.
+Days 16–21
+Full Activation
+All automations running. First leads engaged. Initial reporting live.
+Day 30+
+Optimization
+Monthly review of performance. Campaign adjustments. New segments activated.
+
+--- ppt/slides/slide18.xml ---
+IMPLEMENTATION
+What We Need From You:
+Almost Nothing.
+🔑
+CRM Login Credentials
+Read/write access to contacts and jobs — we handle all data work
+📞
+Phone Number Configuration
+15-minute call with your office manager to configure missed-call routing
+📋
+Brand Assets
+Logo, brand colors, company name — shared once at onboarding
+✅
+Campaign Approval
+You review and approve all messages before anything sends to customers
+We Handle Everything Else
+✓  Full system configuration
+✓  CRM segmentation & tagging
+✓  Campaign copywriting
+✓  Automation setup & testing
+✓  Ongoing campaign management
+✓  Weekly performance reporting
+✓  Campaign optimization
+
+--- ppt/slides/slide19.xml ---
+TRUST & COMPLIANCE
+Your Customer Data Is Safe.
+Your Reputation Is Protected.
+🔒
+Data Security
+All customer data is encrypted in transit and at rest. We operate under strict data handling agreements.
+⚖️
+Regulatory Compliance
+All SMS and email campaigns follow TCPA, CAN-SPAM, and FCC guidelines. Consent records maintained.
+🚫
+Opt-Out Respect
+Every message includes a simple opt-out. We honor opt-outs immediately and log all preferences.
+👁️
+Human Oversight
+You approve all campaigns before launch. No message reaches your customers without your sign-off.
+🤝
+Brand Protection
+All messaging is written in your brand voice. We never send anything that could embarrass your business.
+📊
+Full Transparency
+You have access to every message sent, every response received, and every campaign metric — always.
+
+--- ppt/slides/slide20.xml ---
+INVESTMENT
+Simple, Transparent Pricing.
+No Hidden Fees.
+Foundation
+$997/mo
+Setup: $1,500
+✓  CRM integration & cleanup
+✓  Lead reactivation campaigns
+✓  Missed-call text-back
+✓  Review collection automation
+✓  Monthly reporting
+✓  2 active campaign sequences
+MOST POPULAR
+Growth
+$1,797/mo
+Setup: $2,500
+✓  Everything in Foundation
+✓  Estimate follow-up automation
+✓  Referral campaign system
+✓  Maintenance reminder sequences
+✓  Membership renewal automation
+✓  Seasonal campaign calendar
+Performance
+Revenue Share
+Setup: Custom
+✓  Everything in Growth
+✓  Performance-based pricing model
+✓  Multi-location support
+✓  Dedicated account manager
+✓  Custom campaign development
+✓  Quarterly strategy sessions
+
+--- ppt/slides/slide21.xml ---
+Every Day You Wait Is Revenue
+You've Already Decided Not to Recover.
+Your competitors are still manually following up with leads — or not at all.
+The companies that build revenue infrastructure now will own the market in 3 years.
+Schedule Discovery Call
+Start Free Database Audit
+View Live Demo
+Revenue Recovery Systems  |  [yourwebsite.com]  |  [yourphone]  |  [youremail]

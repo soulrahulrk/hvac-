@@ -52,68 +52,41 @@ const chartData = [
   { month: 'Jun', amount: 5310, pct: 63 },
 ];
 
-const activities = [
-  { icon: '📞', text: 'Missed call from John Smith — auto text sent', time: '2 min ago', color: '#f59e0b' },
-  { icon: '⭐', text: 'New 5-star review collected from Sarah Johnson', time: '15 min ago', color: '#10b981' },
-  { icon: '💰', text: 'Estimate #4521 accepted — $3,200 recovered', time: '42 min ago', color: '#00d4ff' },
-  { icon: '🔄', text: 'Dormant lead Mike Davis reactivated', time: '1 hr ago', color: '#a855f7' },
-  { icon: '📧', text: 'Follow-up email sent to 12 pending estimates', time: '2 hr ago', color: '#3b82f6' },
-  { icon: '📞', text: 'Missed call from Lisa Chen — auto text sent', time: '3 hr ago', color: '#f59e0b' },
-  { icon: '⭐', text: 'New 4-star review collected from Robert Wilson', time: '4 hr ago', color: '#10b981' },
-  { icon: '💰', text: 'Estimate #4519 accepted — $1,850 recovered', time: '5 hr ago', color: '#00d4ff' },
-];
-
-const campaigns = [
-  {
-    name: 'Lead Reactivation',
-    icon: '🔄',
-    sent: 45,
-    responded: 12,
-    metric: '$4,500 recovered',
-    progress: 67,
-    color: '#00d4ff',
-  },
-  {
-    name: 'Estimate Follow-Up',
-    icon: '📋',
-    sent: 28,
-    responded: 8,
-    metric: '$4,800 recovered',
-    progress: 82,
-    color: '#10b981',
-  },
-  {
-    name: 'Review Collection',
-    icon: '⭐',
-    sent: 35,
-    responded: 18,
-    metric: '14 reviews collected',
-    progress: 51,
-    color: '#a855f7',
-  },
-  {
-    name: 'Membership Renewal',
-    icon: '🔑',
-    sent: 22,
-    responded: 13,
-    metric: '$2,160 recovered',
-    progress: 59,
-    color: '#f59e0b',
-  },
-];
-
-/* ------------------------------------------------------------------ */
-/*  Component                                                          */
-/* ------------------------------------------------------------------ */
-
 export default function DashboardPage() {
   const [visible, setVisible] = useState(false);
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
     // Trigger fade-in after mount
     const t = setTimeout(() => setVisible(true), 50);
+    
+    // Fetch real data
+    fetch('/api/dashboard')
+      .then(res => res.json())
+      .then(resData => {
+        if (!resData.error) {
+          setData(resData);
+        }
+      })
+      .catch(err => console.error("Error fetching dash data", err));
+
     return () => clearTimeout(t);
   }, []);
+
+  const stats = data ? [
+    { label: 'Total Revenue Recovered', value: `$${data.stats.totalRecovered.toLocaleString()}`, trend: 'Live', trendDir: 'up' as const, icon: '💰', color: '#10b981' },
+    { label: 'Active Campaigns', value: data.stats.activeCampaigns.toString(), trend: 'Live', trendDir: 'neutral' as const, icon: '🚀', color: '#3b82f6' },
+    { label: 'Leads Engaged', value: data.stats.totalCustomers.toString(), trend: 'Live', trendDir: 'up' as const, icon: '👥', color: '#00d4ff' },
+    { label: 'Response Rate', value: `${data.stats.responseRate}%`, trend: 'Live', trendDir: 'up' as const, icon: '📈', color: '#a855f7' },
+  ] : [
+    { label: 'Total Revenue Recovered', value: '...', trend: '', trendDir: 'up' as const, icon: '💰', color: '#10b981' },
+    { label: 'Active Campaigns', value: '...', trend: '', trendDir: 'neutral' as const, icon: '🚀', color: '#3b82f6' },
+    { label: 'Leads Engaged', value: '...', trend: '', trendDir: 'up' as const, icon: '👥', color: '#00d4ff' },
+    { label: 'Response Rate', value: '...', trend: '', trendDir: 'up' as const, icon: '📈', color: '#a855f7' },
+  ];
+
+  const activities = data?.activities || [];
+  const campaigns = data?.campaigns || [];
 
   return (
     <>

@@ -1,64 +1,37 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { requireAuth } from '@/lib/auth-helpers';
+import { prisma } from '@/lib/db';
+import { syncHubspotContacts } from '@/lib/crm/hubspot';
+import { decrypt } from '@/lib/crypto';
 
-const prisma = new PrismaClient();
-
-export async function GET() {
+export async function POST() {
   try {
-    const token = process.env.HUBSPOT_ACCESS_TOKEN;
+    const user = await requireAuth();
+    
+    const org = await prisma.organization.findUnique({ where: { id: user.orgId } });
+    if (!org) return NextResponse.json({ error: 'Org not found' }, { status: 404 });
+
+    // Use organization's Hubspot token if they have one, otherwise fallback to system token for demo
+    let token = org.hubspotToken ? decrypt(org.hubspotToken) : process.env.HUBSPOT_ACCESS_TOKEN;
+    
     if (!token) {
-      return NextResponse.json({ error: 'Missing Hubspot token' }, { status: 500 });
+      return NextResponse.json({ error: 'HubSpot not configured' }, { status: 400 });
     }
 
-    const res = await fetch('https://api.hubapi.com/crm/v3/objects/contacts?properties=firstname,lastname,email,phone,address,city,state,zip', {
-      headers: {
-        Authorization: `Bearer ${token}`
+    const result = await syncHubspotContacts(user.orgId, token);
+
+    // After sync, automatically trigger a segmentation refresh
+    await prisma.jobQueue.create({
+      data: {
+        orgId: user.orgId,
+        type: 'REFRESH_SEGMENTS',
+        payload: '{}',
+        status: 'PENDING'
       }
     });
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      return NextResponse.json({ error: 'Hubspot API error', details: errorText }, { status: res.status });
-    }
-
-    const data = await res.json();
-    const contacts = data.results || [];
-    
-    let syncedCount = 0;
-
-    for (const contact of contacts) {
-      const props = contact.properties;
-      const email = props.email || `no-email-${contact.id}@hubspot.local`;
-      
-      await prisma.customer.upsert({
-        where: { email },
-        update: {
-          firstName: props.firstname || 'Unknown',
-          lastName: props.lastname || '',
-          phone: props.phone || '',
-          address: props.address || '',
-          city: props.city || '',
-          state: props.state || '',
-          zipCode: props.zip || '',
-        },
-        create: {
-          email,
-          firstName: props.firstname || 'Unknown',
-          lastName: props.lastname || '',
-          phone: props.phone || '',
-          address: props.address || '',
-          city: props.city || '',
-          state: props.state || '',
-          zipCode: props.zip || '',
-          equipmentType: 'Unknown',
-          equipmentAge: 0,
-        }
-      });
-      syncedCount++;
-    }
-
-    return NextResponse.json({ success: true, syncedCount });
+    return NextResponse.json(result);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: error.message === 'Unauthorized' ? 401 : 500 });
   }
 }
