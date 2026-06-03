@@ -99,6 +99,19 @@ export default function SettingsPage() {
           setAiProvider(data.aiProvider || 'groq');
           setAiApiKey(data.aiApiKey || '');
           setAiModel(data.aiModel || 'llama-3-70b');
+          
+          if (data.name) setCompanyName(data.name);
+          if (data.phone) setBizPhone(data.phone);
+          if (data.email) setBizEmail(data.email);
+          if (data.address) setBizAddress(data.address);
+          if (data.brandColor) setBrandColor(data.brandColor);
+          
+          if (data.autoTextBack !== undefined) setAutoTextBack(data.autoTextBack === 'true');
+          if (data.aiResponses !== undefined) setAiResponses(data.aiResponses === 'true');
+          if (data.autoReview !== undefined) setAutoReview(data.autoReview === 'true');
+          if (data.followUpReminders !== undefined) setFollowUpReminders(data.followUpReminders === 'true');
+          if (data.followUpDelay !== undefined) setFollowUpDelay(Number(data.followUpDelay));
+          if (data.maxMessages !== undefined) setMaxMessages(Number(data.maxMessages));
         }
       } catch (err) {
         console.error('Failed to load settings', err);
@@ -123,6 +136,17 @@ export default function SettingsPage() {
           aiProvider,
           aiApiKey,
           aiModel,
+          companyName,
+          bizPhone,
+          bizEmail,
+          bizAddress,
+          brandColor,
+          autoTextBack,
+          aiResponses,
+          autoReview,
+          followUpReminders,
+          followUpDelay,
+          maxMessages,
         })
       });
       if (res.ok) {
@@ -187,6 +211,34 @@ export default function SettingsPage() {
       const data = await res.json();
       if (res.ok) alert('Twilio test SMS sent! SID: ' + data.sid);
       else alert('Twilio test failed: ' + data.error);
+    } catch (err: any) { alert('Error: ' + err.message); }
+  };
+
+  const handleTestAiProvider = async () => {
+    if (!aiApiKey) return alert('Please enter an AI API key first.');
+    try {
+      const res = await fetch('/api/settings/test-ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: aiProvider, apiKey: aiApiKey, model: aiModel }),
+      });
+      const data = await res.json();
+      if (res.ok) alert('AI connection successful! Response: ' + data.message);
+      else alert('AI test failed: ' + data.error);
+    } catch (err: any) { alert('Error: ' + err.message); }
+  };
+
+  const handleTestSupabase = async () => {
+    if (!supabaseUrl || !supabaseKey) return alert('Please enter Supabase URL and Key first.');
+    try {
+      const res = await fetch('/api/settings/test-supabase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: supabaseUrl, key: supabaseKey }),
+      });
+      const data = await res.json();
+      if (res.ok) alert(data.message);
+      else alert('Supabase test failed: ' + data.error);
     } catch (err: any) { alert('Error: ' + err.message); }
   };
 
@@ -909,7 +961,7 @@ export default function SettingsPage() {
             </div>
 
             <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end' }}>
-              <button className="settings-btn ghost sm">Test Connection</button>
+              <button type="button" className="settings-btn ghost sm" onClick={handleTestAiProvider}>Test Connection</button>
             </div>
           </div>
 
@@ -957,7 +1009,7 @@ export default function SettingsPage() {
             </div>
 
             <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end' }}>
-              <button className="settings-btn ghost sm">Connect to Supabase</button>
+              <button type="button" className="settings-btn ghost sm" onClick={handleTestSupabase}>Test Connection</button>
             </div>
           </div>
         </section>
