@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { validateTwilioWebhook } from '@/lib/telephony/twilio';
 
 export async function POST(req: Request) {
   try {
@@ -8,26 +9,42 @@ export async function POST(req: Request) {
     const fromNumber = formData.get('From') as string;
     const toNumber = formData.get('To') as string;
     const callSid = formData.get('CallSid') as string;
-    const callStatus = formData.get('CallStatus') as string; // 'ringing', 'in-progress'
+    const callStatus = formData.get('CallStatus') as string;
 
     if (!fromNumber || !toNumber) {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
     }
 
-    // Find org by Twilio Phone
     const org = await prisma.organization.findFirst({
-      // where: { twilioPhone: toNumber }
+      // Match org based on phone
     });
 
     if (!org) {
-      // End call if no org found
       return new NextResponse(
         '<?xml version="1.0" encoding="UTF-8"?><Response><Reject reason="busy"/></Response>',
         { headers: { 'Content-Type': 'text/xml' } }
       );
     }
 
-    // Find or create customer
+    // Twilio Security Validation
+    if (org.twilioToken) {
+      const signature = req.headers.get('x-twilio-signature') || '';
+      const host = req.headers.get('host') || '';
+      // Reconstruct URL for validation. Assuming https
+      const url = `https://${host}${req.url.replace(/^http(s)?:\/\/[^\/]+/, '')}`;
+      
+      const isValid = validateTwilioWebhook(
+        org.twilioToken,
+        signature,
+        url,
+        Object.fromEntries(formData.entries())
+      );
+
+      if (!isValid) {
+        return new NextResponse('Invalid signature', { status: 403 });
+      }
+    }
+
     let customer = await prisma.customer.findFirst({
       where: { orgId: org.id, phone: fromNumber }
     });
@@ -44,7 +61,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // Log the call
     await prisma.phoneCall.create({
       data: {
         orgId: org.id,
@@ -57,24 +73,17 @@ export async function POST(req: Request) {
       }
     });
 
-    // Check if MISSED CALL TEXT BACK trigger exists
-    const trigger = await prisma.trigger.findFirst({
-      where: { orgId: org.id, event: 'MISSED_CALL', enabled: true }
-    });
-
-    // We generate TwiML for the call.
-    // If we want AI receptionist, we'd use <Gather input="speech">.
-    // For now, simple voicemail or ring forwarding.
+    // AI Voice Receptionist
     const twiml = `
       <?xml version="1.0" encoding="UTF-8"?>
       <Response>
-        <Say voice="Polly.Matthew">Thank you for calling. Please leave a message after the tone.</Say>
-        <Record action="/api/webhooks/voice/record" maxLength="60" />
+        <Gather input="speech" action="/api/webhooks/voice/process" method="POST" speechTimeout="auto">
+          <Say voice="Polly.Matthew">Hello, thank you for calling. How can I help you with your heating or cooling system today?</Say>
+        </Gather>
+        <Say voice="Polly.Matthew">We didn't receive any input. Goodbye.</Say>
+        <Hangup />
       </Response>
     `;
-
-    // Note: To truly detect a "missed call", we handle the Twilio StatusCallback where CallStatus is 'no-answer', 'busy', 'canceled', 'failed'.
-    // If this route is hit, it means the call just started.
 
     return new NextResponse(twiml.trim(), { headers: { 'Content-Type': 'text/xml' } });
   } catch (error) {

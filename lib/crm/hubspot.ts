@@ -68,3 +68,40 @@ export async function syncHubspotContacts(orgId: string, accessToken: string) {
     throw error;
   }
 }
+
+export async function pushCustomerUpdate(customer: any, accessToken: string) {
+  if (!customer.externalId && !customer.hubspotId) return false;
+  
+  const id = customer.externalId || customer.hubspotId;
+  const url = `https://api.hubapi.com/crm/v3/objects/contacts/${id}`;
+  
+  const properties = {
+    hs_lead_status: customer.leadStatus,
+    firstname: customer.firstName,
+    lastname: customer.lastName,
+    phone: customer.phone,
+    email: customer.email
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ properties })
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to push to Hubspot for ${id}:`, await response.text());
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error(`Error pushing to Hubspot for ${id}:`, error);
+    return false;
+  }
+}
+

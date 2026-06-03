@@ -590,7 +590,7 @@ export default function DashboardPage() {
             <div className="activity-title">Recent Activity</div>
             <div className="activity-subtitle">Latest actions &amp; notifications</div>
             <div className="activity-list">
-              {activities.map((a, i) => (
+              {activities.map((a: any, i: number) => (
                 <div className="activity-item" key={i}>
                   <div
                     className="activity-icon-wrap"
@@ -612,7 +612,7 @@ export default function DashboardPage() {
         </div>
         <div className="bottom-grid">
           <div className="campaign-grid">
-            {campaigns.map((c, i) => (
+            {campaigns.map((c: any, i: number) => (
               <div
                 key={c.name}
                 className="glass-card campaign-card"

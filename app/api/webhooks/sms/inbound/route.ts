@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { getAIProvider } from '@/lib/ai/provider';
 import { buildCustomerContext } from '@/lib/ai/context';
 import { sendSms } from '@/lib/telephony/sms-client';
+import { validateTwilioWebhook } from '@/lib/telephony/twilio';
 
 export async function POST(req: Request) {
   try {
@@ -26,6 +27,24 @@ export async function POST(req: Request) {
 
     if (!org) {
       return NextResponse.json({ success: false, error: 'Org not found' });
+    }
+
+    // Twilio Security Validation
+    if (org.twilioToken) {
+      const signature = req.headers.get('x-twilio-signature') || '';
+      const host = req.headers.get('host') || '';
+      const url = `https://${host}${req.url.replace(/^http(s)?:\/\/[^\/]+/, '')}`;
+      
+      const isValid = validateTwilioWebhook(
+        org.twilioToken,
+        signature,
+        url,
+        Object.fromEntries(formData.entries())
+      );
+
+      if (!isValid) {
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
+      }
     }
 
     // Find customer by phone number

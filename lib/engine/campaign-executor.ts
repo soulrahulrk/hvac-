@@ -93,7 +93,7 @@ export async function executeCampaignStep(enrollmentId: string) {
     try {
       const org = enrollment.campaign.org;
       let apiKey = org.aiApiKey ? decrypt(org.aiApiKey) : null;
-      if (!apiKey) apiKey = org.aiProvider === 'gemini' ? process.env.GOOGLE_API_KEY : process.env.KIMI_API_KEY;
+      if (!apiKey) apiKey = (org.aiProvider === 'gemini' ? process.env.GOOGLE_API_KEY : process.env.KIMI_API_KEY) || null;
       
       if (apiKey) {
         const provider = getAIProvider(org.aiProvider, apiKey, org.aiModel);

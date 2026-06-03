@@ -10,7 +10,7 @@ export async function GET() {
       where: { orgId: user.orgId },
       include: {
         referrer: true,
-        referredCustomer: true
+        referred: true
       },
       orderBy: { createdAt: 'desc' }
     });

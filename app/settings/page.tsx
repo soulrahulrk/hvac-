@@ -40,6 +40,14 @@ export default function SettingsPage() {
   const [showTwilioSid, setShowTwilioSid] = useState(false);
   const [showTwilioToken, setShowTwilioToken] = useState(false);
 
+  /* ── HubSpot ────────────────────────────── */
+  const [hubspotToken, setHubspotToken] = useState('');
+  const [showHubspotToken, setShowHubspotToken] = useState(false);
+
+  /* ── Textbelt ───────────────────────────── */
+  const [textbeltKey, setTextbeltKey] = useState('');
+  const [showTextbeltKey, setShowTextbeltKey] = useState(false);
+
   /* ── AI Provider ────────────────────────── */
   const [aiProvider, setAiProvider] = useState('groq');
   const [aiApiKey, setAiApiKey] = useState('');
@@ -642,6 +650,76 @@ export default function SettingsPage() {
 
             <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end' }}>
               <button className="settings-btn ghost sm">Test Connection</button>
+            </div>
+          </div>
+
+          {/* ── Textbelt ────────────────────────────── */}
+          <div className="integration-group">
+            <div className="integration-group-header">
+              <h3 className="integration-group-title">Textbelt (SMS Fallback)</h3>
+              <span className={`status-badge ${textbeltKey ? 'green' : 'yellow'}`}>
+                {textbeltKey ? 'Connected' : 'Not Connected'}
+              </span>
+            </div>
+
+            <div className="settings-field">
+              <label className="settings-label">API Key</label>
+              <div className="settings-input-wrap">
+                <input
+                  className="settings-input has-toggle"
+                  type={showTextbeltKey ? 'text' : 'password'}
+                  placeholder="textbelt_test_key"
+                  value={textbeltKey}
+                  onChange={(e) => setTextbeltKey(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="settings-eye-btn"
+                  onClick={() => setShowTextbeltKey(!showTextbeltKey)}
+                  aria-label="Toggle visibility"
+                >
+                  {showTextbeltKey ? '🙈' : '👁️'}
+                </button>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end' }}>
+              <button className="settings-btn ghost sm">Test Connection</button>
+            </div>
+          </div>
+
+          {/* ── HubSpot ─────────────────────────────── */}
+          <div className="integration-group">
+            <div className="integration-group-header">
+              <h3 className="integration-group-title">HubSpot (CRM Sync)</h3>
+              <span className={`status-badge ${hubspotToken ? 'green' : 'yellow'}`}>
+                {hubspotToken ? 'Connected' : 'Not Connected'}
+              </span>
+            </div>
+
+            <div className="settings-field">
+              <label className="settings-label">Private App Token</label>
+              <div className="settings-input-wrap">
+                <input
+                  className="settings-input has-toggle"
+                  type={showHubspotToken ? 'text' : 'password'}
+                  placeholder="pat-na1-..."
+                  value={hubspotToken}
+                  onChange={(e) => setHubspotToken(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="settings-eye-btn"
+                  onClick={() => setShowHubspotToken(!showHubspotToken)}
+                  aria-label="Toggle visibility"
+                >
+                  {showHubspotToken ? '🙈' : '👁️'}
+                </button>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end' }}>
+              <button className="settings-btn ghost sm">Sync Customers</button>
             </div>
           </div>
 

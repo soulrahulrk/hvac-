@@ -29,9 +29,9 @@ export async function POST(req: Request) {
         orgId: user.orgId,
         customerId: body.customerId,
         rating: body.rating,
-        content: body.content,
+        text: body.content || body.text,
         platform: body.platform || 'GOOGLE',
-        url: body.url,
+        authorName: body.authorName || 'Anonymous',
       }
     });
 

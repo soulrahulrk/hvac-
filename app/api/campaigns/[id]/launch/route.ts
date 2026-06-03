@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-helpers';
 import { launchCampaign } from '@/lib/engine/campaign-executor';
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireAuth();
-    const campaignId = params.id;
+    const { id: campaignId } = await params;
 
     const result = await launchCampaign(campaignId, user.orgId);
 

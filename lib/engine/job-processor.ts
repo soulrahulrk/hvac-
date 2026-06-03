@@ -22,25 +22,22 @@ async function sendSms(payload: any) {
 }
 
 export async function processJobQueue() {
-  // Pull top 10 pending jobs that are due
-  const jobs = await prisma.jobQueue.findMany({
-    where: {
-      status: 'PENDING',
-      scheduledFor: { lte: new Date() }
-    },
-    orderBy: [
-      { priority: 'desc' },
-      { scheduledFor: 'asc' }
-    ],
-    take: 10
-  });
+  // Use raw SQL for atomic job claiming using SKIP LOCKED to prevent race conditions
+  // across concurrent cron executions
+  const jobs: any[] = await prisma.$queryRaw`
+    UPDATE "JobQueue"
+    SET status = 'RUNNING', "startedAt" = NOW()
+    WHERE id IN (
+      SELECT id FROM "JobQueue"
+      WHERE status = 'PENDING' AND "scheduledFor" <= NOW()
+      ORDER BY priority DESC, "scheduledFor" ASC
+      FOR UPDATE SKIP LOCKED
+      LIMIT 10
+    )
+    RETURNING *;
+  `;
 
   for (const job of jobs) {
-    // Lock job
-    await prisma.jobQueue.update({
-      where: { id: job.id },
-      data: { status: 'RUNNING', startedAt: new Date() }
-    });
 
     try {
       const payload = JSON.parse(job.payload);

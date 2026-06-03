@@ -35,15 +35,19 @@ export async function POST(req: Request) {
 
     // Save to DB if customerId is provided
     if (customerId) {
-      await prisma.message.create({
-        data: {
-          customerId: Number(customerId),
-          direction: 'OUTBOUND',
-          channel: 'SMS',
-          content: text,
-          status: 'SENT'
-        }
-      });
+      const customer = await prisma.customer.findUnique({ where: { id: customerId } });
+      if (customer) {
+        await prisma.message.create({
+          data: {
+            orgId: customer.orgId,
+            customerId: customer.id,
+            direction: 'OUTBOUND',
+            channel: 'SMS',
+            content: text,
+            status: 'SENT'
+          }
+        });
+      }
     }
 
     return NextResponse.json({ success: true, textbeltResponse: data });
